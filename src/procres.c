@@ -5,6 +5,7 @@
 // under certain conditions
 
 #include <dirent.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <signal.h>
@@ -72,13 +73,16 @@ int get_pid_by_name(const char *proc_name) {
 
 void kill_all_instances(const char *proc_name) {
   int pid;
-  while ((pid = get_pid_by_name(proc_name)) !=
-         -1) { // iterate through every process. fixes a bug when killing
-               // browsers.
+  while ((pid = get_pid_by_name(proc_name)) != -1) {
     if (kill(pid, SIGKILL) == 0) {
       printf("Killed process %d successfully.\n", pid);
     } else {
-      printf("Unable to kill process %d\n", pid);
+      if (errno == ESRCH) {
+        printf("Process %d does not exist anymore.\n", pid);
+      } else {
+        printf("Unable to kill process %d: %s\n", pid, strerror(errno));
+        break;
+      }
     }
   }
 }
@@ -107,7 +111,7 @@ int main(int argc, char *argv[]) {
         return 1;
       }
       if (pid != -1) {
-        printf("Killing process \"%s\"\n", argv[2]);
+        printf("Killing process \"%s\" (PID %d)\n", argv[2], pid);
         kill_all_instances(argv[2]);
         return 0;
       } else {
