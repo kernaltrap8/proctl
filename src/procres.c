@@ -15,7 +15,7 @@
 #include <unistd.h>
 
 #define VERSION                                                                \
-  "procres v1.2\nThis program is licensed under GNU GPLv3 and comes with "     \
+  "procres v1.2c\nThis program is licensed under GNU GPLv3 and comes with "    \
   "ABSOLUTELY NO WARRANTY.\nThe license "                                      \
   "document can be viewed at https://www.gnu.org/licenses/gpl-3.0.en.html\n"
 #define HELP                                                                   \
@@ -84,6 +84,34 @@ void kill_all_instances(const char *proc_name) {
   }
 }
 
+int redirect_std() {
+  // redirect stdout/stderr to /dev/null
+  int dev_null = open("/dev/null", O_WRONLY);
+  if (dev_null == -1) {
+    perror("open");
+    return 1;
+  }
+  dup2(dev_null, STDOUT_FILENO);
+  dup2(dev_null, STDERR_FILENO);
+  close(dev_null);
+  return 0;
+}
+
+int respawn(char *args) {
+  pid_t child_pid = fork();
+
+  if (child_pid == -1) {
+    perror("fork");
+    return 1;
+  }
+  if (child_pid == 0) {
+    execlp(args, args, NULL);
+    perror("execlp");
+    return 1;
+  }
+  return 0;
+}
+
 int main(int argc, char *argv[]) {
   if (argc < 2) {
     fprintf(stderr, "Usage: %s <process_name>\n", argv[0]);
@@ -124,10 +152,8 @@ int main(int argc, char *argv[]) {
   if (!strcmp(argv[1], "procres")) {
     int pid = get_pid_by_name(argv[1]);
     printf("Killing process \"%s\" (PID %d)\n", argv[1], pid);
-    fflush(stdout);
     sleep(10);
     printf("Failed to kill process \"%s\" (PID %d)!\n", argv[1], pid);
-    fflush(stdout);
     return 1;
   }
 
@@ -136,31 +162,13 @@ int main(int argc, char *argv[]) {
     printf("Restarting process \"%s\" (PID %d)\n", argv[1], pid);
     kill_all_instances(argv[1]);
   } else {
-    printf("Unable to locate process \"%s\".\n", argv[1]);
-    return 1;
+    printf("Unable to locate process \"%s\", spawning anyway.\n", argv[1]);
+    redirect_std();
+    respawn(argv[1]);
+    return 0;
   }
 
-  // redirect stdout/stderr to /dev/null
-  int dev_null = open("/dev/null", O_WRONLY);
-  if (dev_null == -1) {
-    perror("open");
-    return 1;
-  }
-  dup2(dev_null, STDOUT_FILENO);
-  dup2(dev_null, STDERR_FILENO);
-  close(dev_null);
-
-  pid_t child_pid = fork();
-
-  if (child_pid == -1) {
-    perror("fork");
-    return 1;
-  }
-  if (child_pid == 0) {
-    execlp(argv[1], argv[1], NULL);
-    perror("execlp");
-    return 1;
-  }
-
+  redirect_std();
+  respawn(argv[1]);
   return 0;
 }
