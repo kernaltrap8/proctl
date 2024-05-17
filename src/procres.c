@@ -14,7 +14,7 @@
 #include <unistd.h>
 
 #define VERSION                                                                \
-  "procres v1.0\nThis program is licensed under GNU GPLv3 and comes with "     \
+  "procres v1.2\nThis program is licensed under GNU GPLv3 and comes with "     \
   "ABSOLUTELY NO WARRANTY.\nThe license "                                      \
   "document can be viewed at https://www.gnu.org/licenses/gpl-3.0.en.html\n"
 #define HELP                                                                   \
@@ -89,24 +89,29 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version")) {
-    printf("%s", VERSION);
-    return 0;
-  }
+  if (argc > 1) {
+    if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version")) {
+      printf("%s", VERSION);
+      return 0;
+    }
 
-  if (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help")) {
-    printf("%s", HELP);
-    return 0;
-  }
+    if (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help")) {
+      printf("%s", HELP);
+      return 0;
+    }
 
-  if (!strcmp(argv[1], "-k") || !strcmp(argv[1], "--kill")) {
-    if (argc < 3) {
-      fprintf(stderr, "Usage: %s -k <process_name>\n", argv[0]);
+    if (!strcmp(argv[1], "-k") || !strcmp(argv[1], "--kill")) {
+      if (argc < 3) {
+        fprintf(stderr, "Usage: %s -k <process_name>\n", argv[0]);
+        return 1;
+      }
+      printf("Killing process \"%s\"\n", argv[2]);
+      kill_all_instances(argv[2]);
+      return 0;
+    } else {
+      printf("Unknown argument.\n%s", HELP);
       return 1;
     }
-    printf("Killing process \"%s\"\n", argv[2]);
-    kill_all_instances(argv[2]);
-    return 0;
   }
 
   int pid = get_pid_by_name(argv[1]);
