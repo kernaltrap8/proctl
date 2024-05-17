@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (argv[1][0] == '-') {
-     if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version")) {
+    if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version")) {
       printf("%s", VERSION);
       return 0;
     }
@@ -101,13 +101,19 @@ int main(int argc, char *argv[]) {
     }
 
     if (!strcmp(argv[1], "-k") || !strcmp(argv[1], "--kill")) {
+      int pid = get_pid_by_name(argv[2]);
       if (argc < 3) {
         fprintf(stderr, "Usage: %s -k <process_name>\n", argv[0]);
         return 1;
       }
-      printf("Killing process \"%s\"\n", argv[2]);
-      kill_all_instances(argv[2]);
-      return 0;
+      if (pid != -1) {
+        printf("Killing process \"%s\"\n", argv[2]);
+        kill_all_instances(argv[2]);
+        return 0;
+      } else {
+        printf("Unable to locate process \"%s\".\n", argv[2]);
+        return 1;
+      }
     } else {
       printf("Invalid argument.\n%s", HELP);
       return 1;
