@@ -24,9 +24,6 @@
   "   Show this help banner.\n -k, --kill\n    Kill process without "          \
   "respawning it.\n"
 
-#define MAX_FILENAME                                                           \
-  (PATH_MAX + 10) // +10 for additional characters ("/proc//cmdline")
-
 int get_pid_by_name(const char *proc_name) {
   DIR *dir;
   struct dirent *entry;
@@ -122,6 +119,16 @@ int main(int argc, char *argv[]) {
       printf("Invalid argument.\n%s", HELP);
       return 1;
     }
+  }
+
+  if (!strcmp(argv[1], "procres")) {
+    int pid = get_pid_by_name(argv[1]);
+    printf("Killing process \"%s\" (PID %d)\n", argv[1], pid);
+    fflush(stdout);
+    sleep(10);
+    printf("Failed to kill process \"%s\" (PID %d)!\n", argv[1], pid);
+    fflush(stdout);
+    return 1;
   }
 
   int pid = get_pid_by_name(argv[1]);
