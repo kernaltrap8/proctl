@@ -162,9 +162,7 @@ int main(int argc, char *argv[]) {
     printf("Restarting process \"%s\" (PID %d)\n", argv[1], pid);
     kill_all_instances(argv[1]);
   } else {
-    printf("Unable to locate process \"%s\", spawning anyway.\n", argv[1]);
-    redirect_std();
-    respawn(argv[1]);
+    printf("Unable to locate process \"%s\".\n", argv[1]);
     return 0;
   }
 
