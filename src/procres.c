@@ -89,8 +89,8 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  if (argc > 1) {
-    if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version")) {
+  if (argv[1][0] == '-') {
+     if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version")) {
       printf("%s", VERSION);
       return 0;
     }
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
       kill_all_instances(argv[2]);
       return 0;
     } else {
-      printf("Unknown argument.\n%s", HELP);
+      printf("Invalid argument.\n%s", HELP);
       return 1;
     }
   }
