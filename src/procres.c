@@ -1,5 +1,5 @@
 // procres Copyright (C) 2024 kernaltrap8
-// This program is licensed under the GNU GPLv2 and comes with
+// This program is licensed under the GNU GPLv3 and comes with
 // ABSOLUTELY NO WARRENTY.
 // This is free software, and you are welcome to redistribute it
 // under certain conditions
@@ -15,14 +15,15 @@
 #include <unistd.h>
 
 #define VERSION                                                                \
-  "procres v1.2c\nThis program is licensed under GNU GPLv3 and comes with "    \
+  "procres v1.3\nThis program is licensed under GNU GPLv3 and comes with "     \
   "ABSOLUTELY NO WARRANTY.\nThe license "                                      \
   "document can be viewed at https://www.gnu.org/licenses/gpl-3.0.en.html\n"
 #define HELP                                                                   \
   "procres\n -v, --version \n    Version and license info.\n -h, "             \
   "--help\n "                                                                  \
   "   Show this help banner.\n -k, --kill\n    Kill process without "          \
-  "respawning it.\n"
+  "respawning it.\n-l, --launch\n    Spawns a procress even if it doesnt "     \
+  "exist.\n"
 
 int get_pid_by_name(const char *proc_name) {
   DIR *dir;
@@ -143,8 +144,21 @@ int main(int argc, char *argv[]) {
         printf("Unable to locate process \"%s\".\n", argv[2]);
         return 1;
       }
+    }
+
+    if (!strcmp(argv[1], "-l") || !strcmp(argv[1], "--launch")) {
+      int pid = get_pid_by_name(argv[2]);
+      if (pid == -1) {
+        printf("Spawning process \"%s\"\n", argv[2]);
+        redirect_std();
+        respawn(argv[2]);
+        return 0;
+      } else if (pid != -1) {
+        printf("Process \"%s\" already exists!\n", argv[2]);
+        return 1;
+      }
     } else {
-      printf("Invalid argument.\n%s", HELP);
+      printf("Invalid argument %s.\n%s", argv[1], HELP);
       return 1;
     }
   }
@@ -165,8 +179,8 @@ int main(int argc, char *argv[]) {
     printf("Unable to locate process \"%s\".\n", argv[1]);
     return 0;
   }
-
   redirect_std();
   respawn(argv[1]);
+
   return 0;
 }
