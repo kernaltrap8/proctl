@@ -15,14 +15,14 @@
 #include <unistd.h>
 
 #define VERSION                                                                \
-  "procres v1.3\nThis program is licensed under GNU GPLv3 and comes with "     \
+  "proctl v1.3\nThis program is licensed under GNU GPLv3 and comes with "      \
   "ABSOLUTELY NO WARRANTY.\nThe license "                                      \
   "document can be viewed at https://www.gnu.org/licenses/gpl-3.0.en.html\n"
 #define HELP                                                                   \
-  "procres\n -v, --version \n    Version and license info.\n -h, "             \
+  "proctl\n -v, --version \n    Version and license info.\n -h, "              \
   "--help\n "                                                                  \
   "   Show this help banner.\n -k, --kill\n    Kill process without "          \
-  "respawning it.\n-l, --launch\n    Spawns a procress even if it doesnt "     \
+  "respawning it.\n-l, --launch\n    Spawns a process even if it doesnt "      \
   "exist.\n"
 
 int get_pid_by_name(const char *proc_name) {
@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if (!strcmp(argv[1], "procres")) {
+  if (!strcmp(argv[1], "proctl")) {
     int pid = get_pid_by_name(argv[1]);
     printf("Killing process \"%s\" (PID %d)\n", argv[1], pid);
     sleep(10);

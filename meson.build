@@ -1,7 +1,7 @@
-project('procres', 'c',
+project('proctl', 'c',
   version : '0.1',
   default_options : ['warning_level=3'])
 
-executable('procres',
-           'src/procres.c',
+executable('proctl',
+           'src/proctl.c',
            install : true)
