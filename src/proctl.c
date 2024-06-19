@@ -15,15 +15,15 @@
 #include <unistd.h>
 
 #define VERSION                                                                \
-  "proctl v1.3\nThis program is licensed under GNU GPLv3 and comes with "      \
+  "proctl v1.5\nThis program is licensed under GNU GPLv3 and comes with "      \
   "ABSOLUTELY NO WARRANTY.\nThe license "                                      \
   "document can be viewed at https://www.gnu.org/licenses/gpl-3.0.en.html\n"
 #define HELP                                                                   \
-  "proctl\n -v, --version \n    Version and license info.\n -h, "              \
+  "proctl v1.5\n -v, --version \n    Version and license info.\n -h, "         \
   "--help\n "                                                                  \
   "   Show this help banner.\n -k, --kill\n    Kill process without "          \
   "respawning it.\n-l, --launch\n    Spawns a process even if it doesnt "      \
-  "exist.\n"
+  "exist.\n -p, --pid\n    Returns the PID of the given process.\n"
 
 int get_pid_by_name(const char *proc_name) {
   DIR *dir;
@@ -113,54 +113,80 @@ int respawn(char *args) {
   return 0;
 }
 
+int isValidArgument(char *arg) {
+  const char *validArgs[] = {
+      "-v, -h, -k, -l, -p, --version, --help, --kill, --launch, --pid"};
+  size_t numArgs = sizeof(validArgs) / sizeof(validArgs[0]);
+  for (size_t i = 0; i < numArgs; ++i) {
+    if (strcmp(arg, validArgs[i]) == 0) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
 int main(int argc, char *argv[]) {
   if (argc < 2) {
     fprintf(stderr, "Usage: %s <process_name>\n", argv[0]);
     return 1;
   }
 
-  if (argv[1][0] == '-') {
-    if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version")) {
-      printf("%s", VERSION);
-      return 0;
-    }
-
-    if (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help")) {
-      printf("%s", HELP);
-      return 0;
-    }
-
-    if (!strcmp(argv[1], "-k") || !strcmp(argv[1], "--kill")) {
-      int pid = get_pid_by_name(argv[2]);
-      if (argc < 3) {
-        fprintf(stderr, "Usage: %s -k <process_name>\n", argv[0]);
-        return 1;
-      }
-      if (pid != -1) {
-        printf("Killing process \"%s\" (PID %d)\n", argv[2], pid);
-        kill_all_instances(argv[2]);
+  if (argc == 2) {
+    if (argv[1][0] == '-') {
+      if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version")) {
+        printf("%s", VERSION);
         return 0;
-      } else {
-        printf("Unable to locate process \"%s\".\n", argv[2]);
-        return 1;
       }
-    }
 
-    if (!strcmp(argv[1], "-l") || !strcmp(argv[1], "--launch")) {
-      int pid = get_pid_by_name(argv[2]);
-      if (pid == -1) {
-        printf("Spawning process \"%s\"\n", argv[2]);
-        redirect_std();
-        respawn(argv[2]);
+      if (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help")) {
+        printf("%s", HELP);
         return 0;
-      } else if (pid != -1) {
-        printf("Process \"%s\" already exists!\n", argv[2]);
-        return 1;
       }
-    } else {
-      printf("Invalid argument %s.\n%s", argv[1], HELP);
-      return 1;
+
+      if (!strcmp(argv[1], "-k") || !strcmp(argv[1], "--kill")) {
+        int pid = get_pid_by_name(argv[2]);
+        if (argc < 3) {
+          fprintf(stderr, "Usage: %s -k <process_name>\n", argv[0]);
+          return 1;
+        }
+        if (pid != -1) {
+          printf("Killing process \"%s\" (PID %d)\n", argv[2], pid);
+          kill_all_instances(argv[2]);
+          return 0;
+        } else {
+          printf("Unable to locate process \"%s\".\n", argv[2]);
+          return 1;
+        }
+
+        if (!strcmp(argv[1], "-l") || !strcmp(argv[1], "--launch")) {
+          int pid = get_pid_by_name(argv[2]);
+          if (pid == -1) {
+            printf("Spawning process \"%s\"\n", argv[2]);
+            redirect_std();
+            respawn(argv[2]);
+            return 0;
+          } else if (pid != -1) {
+            printf("Process \"%s\" already exists!\n", argv[2]);
+            return 1;
+          }
+        } else {
+          printf("Invalid argument %s.\n%s", argv[1], HELP);
+          return 1;
+        }
+      }
+      if (!strcmp(argv[1], "-p") || !strcmp(argv[1], "--pid")) {
+        printf("%i", get_pid_by_name(argv[2]));
+        return 0;
+      }
     }
+  } else if (argc > 2) {
+    printf("Too many arguments.\n");
+    fprintf(stderr, "Usage: %s <process_name>\n", argv[0]);
+    return 1;
+  }
+  if (!isValidArgument(argv[1])) {
+    printf("%s", HELP);
+    return 1;
   }
 
   if (!strcmp(argv[1], "proctl")) {
