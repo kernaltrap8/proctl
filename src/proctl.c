@@ -147,7 +147,13 @@ int main(int argc, char *argv[]) {
     }
 
     if (!strcmp(argv[1], "-p") || !strcmp(argv[1], "--pid")) {
-      printf("%i", get_pid_by_name(argv[2]));
+      int pid = get_pid_by_name(argv[2]);
+      if (pid != -1) {
+        printf("%i", pid);
+      } else {
+        printf("Unable to locate process \"%s\".\n", argv[2]);
+        return 1;
+      }
       return 0;
     }
 
