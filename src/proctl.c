@@ -15,15 +15,15 @@
 #include <unistd.h>
 
 #define VERSION                                                                \
-  "proctl v1.3\nThis program is licensed under GNU GPLv3 and comes with "      \
+  "proctl v1.5\nThis program is licensed under GNU GPLv3 and comes with "      \
   "ABSOLUTELY NO WARRANTY.\nThe license "                                      \
   "document can be viewed at https://www.gnu.org/licenses/gpl-3.0.en.html\n"
 #define HELP                                                                   \
-  "proctl\n -v, --version \n    Version and license info.\n -h, "              \
+  "proctl v1.5\n -v, --version \n    Version and license info.\n -h, "         \
   "--help\n "                                                                  \
   "   Show this help banner.\n -k, --kill\n    Kill process without "          \
-  "respawning it.\n-l, --launch\n    Spawns a process even if it doesnt "      \
-  "exist.\n"
+  "respawning it.\n -l, --launch\n    Spawns a process even if it doesnt "     \
+  "exist.\n -p, --pid\n    Returns the PID of a given process.\n"
 
 int get_pid_by_name(const char *proc_name) {
   DIR *dir;
@@ -144,6 +144,11 @@ int main(int argc, char *argv[]) {
         printf("Unable to locate process \"%s\".\n", argv[2]);
         return 1;
       }
+    }
+
+    if (!strcmp(argv[1], "-p") || !strcmp(argv[1], "--pid")) {
+      printf("%i", get_pid_by_name(argv[2]));
+      return 0;
     }
 
     if (!strcmp(argv[1], "-l") || !strcmp(argv[1], "--launch")) {
