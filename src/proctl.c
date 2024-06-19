@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  if (argc > 2) {
+  if (argc == 2) {
     if (argv[1][0] == '-') {
       if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version")) {
         printf("%s", VERSION);
@@ -179,8 +179,11 @@ int main(int argc, char *argv[]) {
         return 0;
       }
     }
+  } else if (argc > 2) {
+    printf("Too many arguments.\n");
+    fprintf(stderr, "Usage: %s <process_name>\n", argv[0]);
+    return 1;
   }
-
   if (!isValidArgument(argv[1])) {
     printf("%s", HELP);
     return 1;
